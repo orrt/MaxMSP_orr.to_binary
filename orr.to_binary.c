@@ -78,14 +78,15 @@ void to_binary_free(t_to_binary *x)
 
 void *to_binary_new(t_symbol *s, long argc, t_atom *argv)
 {
-	t_to_binary *x = NULL;
     
+    
+    
+	t_to_binary *x = NULL;
     x = (t_to_binary *)object_alloc(to_binary_class);
     
     // create outlets and inlets here
     x->m_outlet = outlet_new((t_object *)x, NULL);
     
-    object_post(&x->ob, "new instance created.");
 	return (x);
 }
 
