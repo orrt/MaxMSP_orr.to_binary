@@ -51,8 +51,6 @@ void ext_main(void *r)
 
 	class_register(CLASS_BOX, c); /* CLASS_NOBOX */
 	to_binary_class = c;
-    
-    post("orr.to_binary object initialized.");
 }
 
 
