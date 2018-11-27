@@ -7,14 +7,15 @@
 #include "ext.h"							// standard Max include, always required
 #include "ext_obex.h"						// required for new style Max object
 
-#define BIN_DIGITS 32
+#define MAX_BIN_DIGITS 32
 
 ////////////////////////// object struct
 typedef struct _to_binary
 {
 	t_object					ob;			// the object itself (must be first)
-    t_atom                      binary_val[BIN_DIGITS]; // store the last binary value
-    void                        *m_outlet; // pointer to out outlet
+    t_atom                      binary_val[MAX_BIN_DIGITS]; // store the last binary value
+    long                        bit_count;  // how many bits are output (8, 16, 24 or 32)
+    void                        *m_outlet;  // pointer to out outlet
 } t_to_binary;
 
 ///////////////////////// function prototypes
@@ -78,23 +79,41 @@ void to_binary_free(t_to_binary *x)
 
 void *to_binary_new(t_symbol *s, long argc, t_atom *argv)
 {
-    
-    
-    
 	t_to_binary *x = NULL;
-    x = (t_to_binary *)object_alloc(to_binary_class);
     
-    // create outlets and inlets here
-    x->m_outlet = outlet_new((t_object *)x, NULL);
+    // argument validation
+    t_atom_long bit_cnt = -1;
     
-	return (x);
+    // if no args default is 32
+    if (argc == 0) bit_cnt = 32;
+    else {
+        atom_arg_getlong(&bit_cnt, 0, argc, argv);
+        if(bit_cnt == 8 || bit_cnt == 16 || bit_cnt == 24 || bit_cnt == 32){
+            ;
+        } else {
+            bit_cnt = -1;
+        }
+    }
+    
+    if(bit_cnt > 0){
+        x = (t_to_binary *)object_alloc(to_binary_class);
+        x->bit_count = bit_cnt;
+        x->m_outlet = outlet_new((t_object *)x, NULL);
+        
+        to_binary(x->binary_val, MAX_BIN_DIGITS, 0); // set all bits to zero
+        
+        
+    } else {
+        object_post(&x->ob, "invalid arguments.");
+    }
+    return (x);
 }
 
 //////////////////////// CUSTOM FUNCTIONS here
 
 void rcv_int(t_to_binary *x, long val){
     // do conversion and write to this objects binary_val array
-    to_binary(x->binary_val, BIN_DIGITS, val);
+    to_binary(x->binary_val, MAX_BIN_DIGITS, val);
     
     // call rcv_bang to output result
     rcv_bang(x);
@@ -104,7 +123,7 @@ void rcv_int(t_to_binary *x, long val){
 
 void rcv_bang(t_to_binary *x){
     // send the message as a list to the outlet
-    outlet_list(x->m_outlet, NIL, BIN_DIGITS, x->binary_val);
+    outlet_list(x->m_outlet, NIL, MAX_BIN_DIGITS, x->binary_val);
 }
 
 
