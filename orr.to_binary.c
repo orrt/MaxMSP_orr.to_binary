@@ -102,7 +102,6 @@ void *to_binary_new(t_symbol *s, long argc, t_atom *argv)
         
         to_binary(x->binary_val, MAX_BIN_DIGITS, 0); // set all bits to zero
         
-        
     } else {
         object_post(&x->ob, "invalid arguments.");
     }
@@ -112,8 +111,9 @@ void *to_binary_new(t_symbol *s, long argc, t_atom *argv)
 //////////////////////// CUSTOM FUNCTIONS here
 
 void rcv_int(t_to_binary *x, long val){
+    
     // do conversion and write to this objects binary_val array
-    to_binary(x->binary_val, MAX_BIN_DIGITS, val);
+    to_binary(x->binary_val, x->bit_count, val);
     
     // call rcv_bang to output result
     rcv_bang(x);
@@ -123,7 +123,7 @@ void rcv_int(t_to_binary *x, long val){
 
 void rcv_bang(t_to_binary *x){
     // send the message as a list to the outlet
-    outlet_list(x->m_outlet, NIL, MAX_BIN_DIGITS, x->binary_val);
+    outlet_list(x->m_outlet, NIL, x->bit_count, x->binary_val);
 }
 
 
